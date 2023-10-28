@@ -1,6 +1,9 @@
 import express, { Express, Request, Response } from "express";
+import bodyParser from "body-parser";
 
-const app = express();
+const app: Express = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
