@@ -1,13 +1,15 @@
-import express, { Express, Request, Response } from "express";
-import bodyParser from "body-parser";
+import express, { Express } from 'express';
+import bodyParser from 'body-parser';
+import addRoutes from './routes';
 
 const app: Express = express();
 
+// Third-party middleware
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World");
-});
+// Routes
+addRoutes(app);
 
 const PORT = process.env.PORT || 3000;
 
