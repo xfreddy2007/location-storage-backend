@@ -1,12 +1,11 @@
 import express, { Express } from 'express';
-import bodyParser from 'body-parser';
+import addThirdPartyMiddleware from './middleware/third-party';
 import addRoutes from './routes';
 
 const app: Express = express();
 
-// Third-party middleware
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.json());
+// Third Party Middleware
+addThirdPartyMiddleware(app);
 
 // Routes
 addRoutes(app);

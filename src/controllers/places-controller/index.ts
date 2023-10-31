@@ -3,7 +3,7 @@ import { HttpError } from '../../models/http-error';
 import { RequestHandler } from 'express';
 import crypto, { UUID } from 'crypto';
 
-const DUMMY_PLACES: PlaceType[] = [
+let DUMMY_PLACES: PlaceType[] = [
   {
     id: 'p1-qwe-asd-sdf-ghf',
     title: 'Empire State Building',
@@ -17,31 +17,36 @@ const DUMMY_PLACES: PlaceType[] = [
   },
 ];
 
-type PlacesControllerKeys = 'getPlacesById' | 'getPlacesByUserId' | 'createPlace';
+type PlacesControllerKeys =
+  | 'getPlaceById'
+  | 'getPlacesByUserId'
+  | 'createPlace'
+  | 'updatePlaceById'
+  | 'deletePlaceById';
 type PlaceControllerType = Record<PlacesControllerKeys, RequestHandler>;
 
 const placesController: PlaceControllerType = {
-  getPlacesById: (req, res, next) => {
-    const placeId = req.params.pid;
+  getPlaceById(req, res, next) {
+    const placeId = req.params.pid as UUID;
     const place = DUMMY_PLACES.find((p) => p.id === placeId);
 
     if (!place) {
       return next(new HttpError('Cannot find a place with provided id.', 404));
     }
 
-    res.json({ place });
+    return res.json({ place });
   },
-  getPlacesByUserId: (req, res, next) => {
-    const userId = req.params.uid;
-    const place = DUMMY_PLACES.find((p) => p.id === userId);
+  getPlacesByUserId(req, res, next) {
+    const userId = req.params.uid as UUID;
+    const place = DUMMY_PLACES.filter((p) => p.id === userId);
 
-    if (!place) {
+    if (!place || place.length === 0) {
       return next(new HttpError('Cannot find a place with provided id.', 404));
     }
 
-    res.json({ place });
+    return res.json({ place });
   },
-  createPlace: (req, res, next) => {
+  createPlace(req, res, next) {
     const { title, description, location, address, creator }: PlaceType = req.body;
     const createPlace: PlaceType = {
       id: crypto.randomUUID(),
@@ -55,7 +60,34 @@ const placesController: PlaceControllerType = {
     // add places
     DUMMY_PLACES.push(createPlace);
 
-    res.status(201).json({ place: createPlace });
+    return res.status(201).json({ place: createPlace });
+  },
+  updatePlaceById(req, res, next) {
+    const { title, description }: PlaceType = req.body;
+    const placeId = req.params.pid as UUID;
+    const originalPlaceIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+    if (originalPlaceIndex < 0) {
+      return next(new HttpError('Update failed!', 404));
+    }
+
+    const updatedPlace = {
+      ...DUMMY_PLACES[originalPlaceIndex],
+      title,
+      description,
+    };
+    DUMMY_PLACES[originalPlaceIndex] = updatedPlace;
+
+    return res.status(200).json({ place: updatedPlace });
+  },
+  deletePlaceById(req, res, next) {
+    const placeId = req.params.pid as UUID;
+    const deletePlaceIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+    if (deletePlaceIndex < 0) {
+      return next(new HttpError('Delete failed!', 404));
+    }
+
+    DUMMY_PLACES = DUMMY_PLACES.filter((place) => place.id !== placeId);
+    return res.status(200).json({ message: 'Delete place.' });
   },
 };
 
