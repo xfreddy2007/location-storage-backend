@@ -1,6 +1,7 @@
-import { PlaceType } from '@/types/places';
+import type { PlaceType } from '@/types/places';
 import { HttpError } from '../../models/http-error';
 import { RequestHandler } from 'express';
+import { validationResult } from 'express-validator';
 import crypto, { UUID } from 'crypto';
 
 let DUMMY_PLACES: PlaceType[] = [
@@ -47,6 +48,12 @@ const placesController: PlaceControllerType = {
     return res.json({ place });
   },
   createPlace(req, res, next) {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return new HttpError('Invalid input passed, please check your data.', 422);
+    }
+
     const { title, description, location, address, creator }: PlaceType = req.body;
     const createPlace: PlaceType = {
       id: crypto.randomUUID(),
@@ -63,6 +70,12 @@ const placesController: PlaceControllerType = {
     return res.status(201).json({ place: createPlace });
   },
   updatePlaceById(req, res, next) {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return new HttpError('Invalid input passed, please check your data.', 422);
+    }
+
     const { title, description }: PlaceType = req.body;
     const placeId = req.params.pid as UUID;
     const originalPlaceIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
@@ -83,7 +96,7 @@ const placesController: PlaceControllerType = {
     const placeId = req.params.pid as UUID;
     const deletePlaceIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
     if (deletePlaceIndex < 0) {
-      return next(new HttpError('Delete failed!', 404));
+      return next(new HttpError('Could not find a place for that id.', 404));
     }
 
     DUMMY_PLACES = DUMMY_PLACES.filter((place) => place.id !== placeId);

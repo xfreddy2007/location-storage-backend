@@ -1,7 +1,8 @@
-import express, { Router } from 'express';
+import { Router } from 'express';
+import { check } from 'express-validator';
 import usersController from '../../controllers/users-controller';
 
-const router: Router = express.Router();
+const router: Router = Router();
 
 const { getUsers, signup, login } = usersController;
 
@@ -9,7 +10,15 @@ const { getUsers, signup, login } = usersController;
 router.get('/', getUsers);
 
 // Signup for a single user
-router.post('/signup', signup);
+router.post(
+  '/signup',
+  [
+    check('name').not().isEmpty(),
+    check('email').normalizeEmail().isEmail(),
+    check('password').isLength({ min: 6 }),
+  ],
+  signup,
+);
 
 // login for a single user
 router.post('/login', login);

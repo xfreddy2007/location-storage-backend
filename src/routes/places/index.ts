@@ -1,7 +1,8 @@
-import express, { Router } from 'express';
+import { Router } from 'express';
+import { check } from 'express-validator';
 import placesController from '../../controllers/places-controller';
 
-const router: Router = express.Router();
+const router: Router = Router();
 
 const { getPlaceById, getPlacesByUserId, createPlace, updatePlaceById, deletePlaceById } = placesController;
 
@@ -12,10 +13,22 @@ router.get('/:pid', getPlaceById);
 router.get('/user/:uid', getPlacesByUserId);
 
 // create a stored place data
-router.post('/', createPlace);
+router.post(
+  '/',
+  [
+    check('title').not().isEmpty(),
+    check('description').isLength({ min: 5 }),
+    check('address').not().isEmpty(),
+  ],
+  createPlace,
+);
 
 // update a stored place data
-router.patch('/:pid', updatePlaceById);
+router.patch(
+  '/:pid',
+  [check('title').not().isEmpty(), check('description').isLength({ min: 5 })],
+  updatePlaceById,
+);
 
 // delete a stored place data
 router.delete('/:pid', deletePlaceById);

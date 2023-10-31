@@ -1,7 +1,8 @@
 import type { UserType } from '@/types/users';
 import { HttpError } from '../../models/http-error';
 import { RequestHandler } from 'express';
-import crypto, { UUID } from 'crypto';
+import { validationResult } from 'express-validator';
+import crypto from 'crypto';
 
 type UsersControllerKeys = 'getUsers' | 'signup' | 'login';
 type UsersControllerType = Record<UsersControllerKeys, RequestHandler>;
@@ -20,6 +21,12 @@ const usersController: UsersControllerType = {
     return res.json({ users: DUMMY_USERS });
   },
   signup(req, res, next) {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return new HttpError('Invalid input passed, please check your data.', 422);
+    }
+
     const { name, email, password }: UserType = req.body;
 
     const isUserAlreadyExist = !!DUMMY_USERS.find((user) => user.email === email);
