@@ -3,6 +3,7 @@ import { HttpError } from '../../models/http-error';
 import { RequestHandler } from 'express';
 import { validationResult } from 'express-validator';
 import crypto, { UUID } from 'crypto';
+import { getCoordinatesFromGoogle } from '../../utils/location';
 
 let DUMMY_PLACES: PlaceType[] = [
   {
@@ -47,14 +48,21 @@ const placesController: PlaceControllerType = {
 
     return res.json({ place });
   },
-  createPlace(req, res, next) {
+  async createPlace(req, res, next) {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return new HttpError('Invalid input passed, please check your data.', 422);
+      return next(new HttpError('Invalid input passed, please check your data.', 422));
     }
 
-    const { title, description, location, address, creator }: PlaceType = req.body;
+    const { title, description, address, creator }: PlaceType = req.body;
+    let location: PlaceType['location'];
+    try {
+      location = await getCoordinatesFromGoogle(address);
+    } catch (error) {
+      return next(error);
+    }
+
     const createPlace: PlaceType = {
       id: crypto.randomUUID(),
       title,
@@ -73,7 +81,7 @@ const placesController: PlaceControllerType = {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return new HttpError('Invalid input passed, please check your data.', 422);
+      return next(new HttpError('Invalid input passed, please check your data.', 422));
     }
 
     const { title, description }: PlaceType = req.body;

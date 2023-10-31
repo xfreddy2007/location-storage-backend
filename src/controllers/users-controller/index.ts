@@ -24,7 +24,7 @@ const usersController: UsersControllerType = {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return new HttpError('Invalid input passed, please check your data.', 422);
+      return next(new HttpError('Invalid input passed, please check your data.', 422));
     }
 
     const { name, email, password }: UserType = req.body;
@@ -32,7 +32,7 @@ const usersController: UsersControllerType = {
     const isUserAlreadyExist = !!DUMMY_USERS.find((user) => user.email === email);
 
     if (isUserAlreadyExist) {
-      return new HttpError('Could not create user, email already exists.', 422);
+      return next(new HttpError('Could not create user, email already exists.', 422));
     }
 
     const createUser: UserType = {
@@ -51,7 +51,7 @@ const usersController: UsersControllerType = {
 
     const identifiedUser = DUMMY_USERS.find((user) => user.email === email);
     if (!identifiedUser || identifiedUser.password !== password) {
-      return new HttpError('Could not identified user, credential seems to be wrong.', 401);
+      return next(new HttpError('Could not identified user, credential seems to be wrong.', 401));
     }
 
     return res.status(200).json({ message: 'Logged in.' });

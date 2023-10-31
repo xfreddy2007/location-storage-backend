@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import addThirdPartyMiddleware from './middleware/third-party';
 import addRoutes from './routes';
+import 'dotenv/config';
 
 const app: Express = express();
 
