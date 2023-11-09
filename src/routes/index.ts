@@ -5,7 +5,7 @@ import placeRouter from './places';
 
 const addRoutes = (app: Express): Express => {
   // user routes
-  app.use('api/users', userRouter);
+  app.use('/api/users', userRouter);
 
   // places routes
   app.use('/api/places', placeRouter);

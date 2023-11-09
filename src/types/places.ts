@@ -1,7 +1,4 @@
-import type { UUID } from 'crypto';
-
 export type PlaceType = {
-  id: UUID;
   title: string;
   description: string;
   location: {
@@ -9,5 +6,5 @@ export type PlaceType = {
     longitude: number;
   };
   address: string;
-  creator: UUID;
+  creator: string;
 };

@@ -1,8 +1,18 @@
-import mongoose from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 
-const Schema = mongoose.Schema;
+export interface PlaceType extends Document {
+  title: string;
+  description: string;
+  image: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  address: string;
+  creator: Types.ObjectId;
+}
 
-const placeSchema = new Schema({
+const placeSchema = new Schema<PlaceType>({
   title: { type: String, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
@@ -11,7 +21,7 @@ const placeSchema = new Schema({
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
   },
-  creator: { type: String, required: true },
+  creator: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
 });
 
-export default mongoose.model('Place', placeSchema);
+export default model<PlaceType>('Place', placeSchema);
